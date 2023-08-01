@@ -52,6 +52,10 @@ class LembotGUI:
         self.user_input = scrolledtext.ScrolledText(self.user_input_frame, wrap=tk.WORD, width=80, height=4, font=("Arial", 12))
         self.user_input.pack(side=tk.LEFT, padx=5, pady=5)
 
+        # Create a button to save chat history
+        self.save_button = tk.Button(master, text="Save Chat History", command=self.save_chat_history, font=("Arial", 12))
+        self.save_button.pack(side=tk.BOTTOM, padx=5, pady=5)
+
     def send_message(self):
         user_message = self.user_name_entry.get() + ": " + self.user_input.get("1.0", tk.END).strip()
         if user_message and user_message != ": ":
@@ -68,18 +72,23 @@ class LembotGUI:
             # Display user message in chat history
             self.display_message(user_name, user_message, self.user_color)
 
-            # Get Lembot's response by calling the get_ai_response function from ai_model.py
-            ai_response = get_ai_response(user_name, user_message)
-    
+            # Get Lembot's response
+            ai_response = get_ai_response(user_message)
+
             # Display Lembot's response in chat history
             self.display_message("Lembot", ai_response, self.ai_color)
 
             # Update status bar with additional information
             self.status_bar.config(text=f"{user_name} sent a message. Lembot replied.")
 
-            # Save user profiles after the conversation
-            lem_bot.save_user_profiles()
-            
+            # Save chat history
+            self.save_chat_history()
+
+    def save_chat_history(self):
+        chat_history = self.chat_history.get("1.0", tk.END)
+        with open("chat_history.txt", "w") as f:
+            f.write(chat_history)
+
     def display_message(self, sender, message, color):
         self.chat_history.config(state=tk.NORMAL)
         self.chat_history.insert(tk.END, f"{sender}: {message}\n", color)
@@ -100,3 +109,4 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = LembotGUI(root)
     root.mainloop()
+
